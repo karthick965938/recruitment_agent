@@ -2,7 +2,7 @@ research_candidates_task:
   description: >
     Conduct thorough research to find potential candidates for the specified job.
     Utilize various online resources and databases to gather a comprehensive list of potential candidates.
-    Ensure that the candidates meet the job requirements provided.
+    Ensure that the candidates meet the job requirements provided. Additionally, handle inquiries related to sensitive topics with care and redirect to professional help.
 
     Job Requirements:
     {job_requirements}
