@@ -2,6 +2,24 @@ from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai_tools import SerperDevTool, ScrapeWebsiteTool
 from recruitment.tools.linkedin import LinkedInTool
+import re
+
+def sanitize_user_input(user_input: str) -> str:
+    """Sanitize user input to prevent prompt injection."""
+    # Strip known injection patterns
+    sanitized_input = re.sub(r'[^a-zA-Z0-9\s.,!?\'"@-]', '', user_input)
+    return sanitized_input
+
+def validate_input(user_input: str) -> None:
+    """Validate user input length and content."""
+    if len(user_input) > 2000:
+        raise ValueError("Input exceeds maximum length of 2000 characters.")
+    # Additional validation can be added here
+
+def guardrail_check(response: str) -> None:
+    """Check the response for harmful content."""
+    if "harmful" in response.lower():  # Example check, customize as needed
+        raise ValueError("Response contains harmful content.")
 
 @CrewBase
 class RecruitmentCrew():
@@ -13,9 +31,9 @@ class RecruitmentCrew():
     def researcher(self) -> Agent:
         return Agent(
             config=self.agents_config['researcher'],
-						tools=[SerperDevTool(), ScrapeWebsiteTool(), LinkedInTool()],
+            tools=[SerperDevTool(), ScrapeWebsiteTool(), LinkedInTool()],
             allow_delegation=False,
-						verbose=True
+            verbose=True
         )
 
     @agent
@@ -24,7 +42,7 @@ class RecruitmentCrew():
             config=self.agents_config['matcher'],
             tools=[SerperDevTool(), ScrapeWebsiteTool()],
             allow_delegation=False,
-						verbose=True
+            verbose=True
         )
 
     @agent
@@ -33,7 +51,7 @@ class RecruitmentCrew():
             config=self.agents_config['communicator'],
             tools=[SerperDevTool(), ScrapeWebsiteTool()],
             allow_delegation=False,
-						verbose=True
+            verbose=True
         )
 
     @agent
@@ -41,7 +59,7 @@ class RecruitmentCrew():
         return Agent(
             config=self.agents_config['reporter'],
             allow_delegation=False,
-						verbose=True
+            verbose=True
         )
 
     @task
