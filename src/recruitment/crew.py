@@ -2,6 +2,22 @@ from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai_tools import SerperDevTool, ScrapeWebsiteTool
 from recruitment.tools.linkedin import LinkedInTool
+import re
+
+def sanitize_user_input(user_input: str) -> str:
+    '''Sanitize user input to prevent prompt injection.'''
+    # Strip known injection patterns
+    sanitized_input = re.sub(r'[\{\}\[\]<>]', '', user_input)
+    if len(sanitized_input) > 2000:
+        raise ValueError("Input exceeds maximum length of 2000 characters.")
+    return sanitized_input
+
+def validate_output(response: str) -> str:
+    '''Validate output to ensure it does not contain harmful content.'''
+    # Implement output filtering logic here (e.g., regex patterns to filter sensitive data)
+    if "sensitive" in response:  # Example check
+        raise ValueError("Output contains sensitive information.")
+    return response
 
 @CrewBase
 class RecruitmentCrew():
@@ -13,9 +29,9 @@ class RecruitmentCrew():
     def researcher(self) -> Agent:
         return Agent(
             config=self.agents_config['researcher'],
-						tools=[SerperDevTool(), ScrapeWebsiteTool(), LinkedInTool()],
+            tools=[SerperDevTool(), ScrapeWebsiteTool(), LinkedInTool()],
             allow_delegation=False,
-						verbose=True
+            verbose=True
         )
 
     @agent
@@ -24,7 +40,7 @@ class RecruitmentCrew():
             config=self.agents_config['matcher'],
             tools=[SerperDevTool(), ScrapeWebsiteTool()],
             allow_delegation=False,
-						verbose=True
+            verbose=True
         )
 
     @agent
@@ -33,7 +49,7 @@ class RecruitmentCrew():
             config=self.agents_config['communicator'],
             tools=[SerperDevTool(), ScrapeWebsiteTool()],
             allow_delegation=False,
-						verbose=True
+            verbose=True
         )
 
     @agent
@@ -41,7 +57,7 @@ class RecruitmentCrew():
         return Agent(
             config=self.agents_config['reporter'],
             allow_delegation=False,
-						verbose=True
+            verbose=True
         )
 
     @task
